@@ -39,7 +39,7 @@ if (isProduction) {
 app.use(cors(corsConfig));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Serve static files from img_libs folder
 app.use('/img_libs', express.static(path.join(__dirname, 'img_libs')));
@@ -100,21 +100,36 @@ const gameRooms = new Map();
 
 // Health check endpoint
 app.get('/health', (req, res) => {
+  const fs = require('fs');
+  const publicExists = fs.existsSync(path.join(__dirname, 'public'));
+  const indexExists = fs.existsSync(path.join(__dirname, 'public', 'index.html'));
+  
   res.json({ 
     status: 'healthy', 
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
-    uptime: process.uptime()
+    uptime: process.uptime(),
+    debug: {
+      __dirname: __dirname,
+      publicExists: publicExists,
+      indexExists: indexExists,
+      publicPath: path.join(__dirname, 'public'),
+      indexPath: path.join(__dirname, 'public', 'index.html')
+    }
   });
 });
 
 // Routes
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  const filePath = path.join(__dirname, 'public', 'index.html');
+  console.log('🔍 Looking for index.html at:', filePath);
+  res.sendFile(filePath);
 });
 
 app.get('/game/:roomId', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'game.html'));
+  const filePath = path.join(__dirname, 'public', 'game.html');
+  console.log('🔍 Looking for game.html at:', filePath);
+  res.sendFile(filePath);
 });
 
 // API Routes with input validation
