@@ -181,7 +181,8 @@
             flex-wrap: nowrap;
             justify-content: flex-start;
             overflow-x: auto;
-            overflow-y: hidden;
+            overflow-y: visible;
+            padding-top: 16px;
             padding-bottom: 0.5rem;
             scrollbar-width: thin;
             scrollbar-color: var(--primary) transparent;
@@ -221,6 +222,7 @@
             min-width: 180px;
             flex-shrink: 0;
             white-space: nowrap;
+            overflow: visible;
         }
 
         .player-card:hover {
@@ -239,6 +241,48 @@
             color: white;
             border-color: rgba(255, 255, 255, 0.3);
         }
+
+        /* Kick button for host */
+        .player-kick-btn {
+            position: absolute;
+            top: -12px;
+            right: -12px;
+            width: 28px;
+            height: 28px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.8rem;
+            opacity: 0;
+            transform: scale(0.7);
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-lg);
+            z-index: 100;
+            border: 2px solid white;
+        }
+
+        .player-card:hover .player-kick-btn {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .player-kick-btn:hover {
+            background: #dc2626;
+            transform: scale(1.15);
+            box-shadow: var(--shadow-xl);
+        }
+
+        /* Hide kick button for host's own card */
+        .player-card.current-user .player-kick-btn {
+            display: none;
+        }
+
+
 
         .player-avatar {
             width: 32px;
@@ -1029,31 +1073,132 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Success/Error Messages */
-        .message {
-            padding: 1rem 1.5rem;
+        /* Toast Notification System */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 400px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
             border-radius: var(--radius-lg);
-            margin-bottom: 1rem;
+            padding: 1rem 1.5rem;
+            box-shadow: var(--shadow-xl);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.75rem;
+            transform: translateX(450px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: auto;
+            position: relative;
+            overflow: hidden;
+            min-width: 300px;
+            max-width: 100%;
         }
 
-        .message.success {
-            background: rgba(34, 197, 94, 0.1);
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
             color: var(--success);
-            border: 1px solid rgba(34, 197, 94, 0.2);
         }
 
-        .message.error {
-            background: rgba(239, 68, 68, 0.1);
+        .toast.error {
+            border-left: 4px solid var(--danger);
             color: var(--danger);
-            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .toast.warning {
+            border-left: 4px solid var(--warning);
+            color: var(--warning);
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .toast-icon {
+            font-size: 1.25rem;
+            flex-shrink: 0;
+        }
+
+        .toast-content {
+            flex: 1;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: var(--gray-400);
+            cursor: pointer;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .toast-close:hover {
+            background: rgba(0, 0, 0, 0.1);
+            color: var(--gray-600);
+        }
+
+        .toast-progress {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: currentColor;
+            opacity: 0.3;
+            transition: width linear;
+        }
+
+        /* Mobile responsiveness for toast */
+        @media (max-width: 768px) {
+            .toast-container {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+            
+            .toast {
+                min-width: auto;
+                max-width: 100%;
+                transform: translateY(-100px);
+            }
+            
+            .toast.show {
+                transform: translateY(0);
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
     <div class="game-container">
         <!-- Header -->
         <div class="header">
@@ -1213,7 +1358,7 @@
             isHost = sessionStorage.getItem('isHost') === 'true';
             
             if (!playerName || !currentRoom) {
-                showMessage('Thông tin không hợp lệ. Quay về trang chủ.', 'error');
+                showToast('Thông tin không hợp lệ. Quay về trang chủ.', 'error', 3000);
                 setTimeout(() => window.location.href = '/', 2000);
                 return;
             }
@@ -1313,13 +1458,64 @@
             });
 
             socket.on('error', (message) => {
-                showMessage(message, 'error');
+                showToast('❌ ' + message, 'error', 6000);
             });
 
             socket.on('disconnect', () => {
                 console.log('Disconnected from server');
                 addChatMessage('Hệ thống', '⚠️ Mất kết nối với server');
                 updateGameStatus('Mất kết nối', 'error');
+            });
+
+            // Handle host leaving room
+            socket.on('hostLeft', (data) => {
+                console.log('Host left room:', data);
+                showToast(data.message, 'warning', 7000);
+                addChatMessage('Hệ thống', `🚪 ${data.message}`);
+                updateGameStatus('Host đã rời phòng', 'error');
+            });
+
+            // Handle being kicked to lobby
+            socket.on('kickedToLobby', (data) => {
+                console.log('Kicked to lobby:', data);
+                showToast(data.message, 'error', 8000);
+                addChatMessage('Hệ thống', `⚠️ ${data.message}`);
+                
+                // Show countdown toast
+                let countdown = 3;
+                const countdownToast = showToast(`Chuyển về sảnh trong ${countdown} giây...`, 'info', 4000);
+                
+                const countdownInterval = setInterval(() => {
+                    countdown--;
+                    if (countdown > 0) {
+                        const toastContent = countdownToast.querySelector('.toast-content');
+                        if (toastContent) {
+                            toastContent.textContent = `Chuyển về sảnh trong ${countdown} giây...`;
+                        }
+                    } else {
+                        clearInterval(countdownInterval);
+                        window.location.href = '/';
+                    }
+                }, 1000);
+            });
+
+            // Handle player kicked by host
+            socket.on('playerKicked', (data) => {
+                console.log('Player kicked:', data);
+                showToast(`🦶 ${data.kickedPlayerName} đã bị kick bởi host`, 'warning', 5000);
+                addChatMessage('Hệ thống', `🦶 ${data.kickedPlayerName} đã bị kick khỏi phòng`);
+                
+                // Update players list
+                if (data.players) {
+                    updatePlayersList(data.players);
+                    updateGameControls(data.players);
+                }
+            });
+
+            // Handle kick error
+            socket.on('kickError', (data) => {
+                console.log('Kick error:', data);
+                showToast(data.message, 'error', 5000);
             });
         }
 
@@ -1339,11 +1535,23 @@
                     playerCard.classList.add('host');
                 }
                 
+                // Add current-user class for host's own card
+                if (player.name === playerName) {
+                    playerCard.classList.add('current-user');
+                }
+                
+                // Create kick button for host (only show for other players)
+                const kickButton = isHost && player.name !== playerName && !player.isHost ? 
+                    `<button class="player-kick-btn" onclick="kickPlayer('${player.name}')" title="Kick ${player.name}">
+                        <i class="fas fa-times"></i>
+                    </button>` : '';
+                
                 playerCard.innerHTML = `
                     <div class="player-avatar">${player.name.charAt(0).toUpperCase()}</div>
                     <span>${player.name}</span>
                     <span class="player-score">${player.score}</span>
                     ${player.isHost ? '<span class="host-badge"><i class="fas fa-crown"></i> Host</span>' : ''}
+                    ${kickButton}
                 `;
                 
                 playersList.appendChild(playerCard);
@@ -1958,24 +2166,24 @@
                 updateGameControls(data.players);
             }
             
-            showMessage('Trò chơi đã được dừng và reset!', 'success');
+            showToast('🔄 Trò chơi đã được dừng và reset!', 'info', 4000);
         }
 
         function startGame() {
             socket.emit('startGame', currentRoom);
-            showMessage('Đang bắt đầu trò chơi...', 'success');
+            showToast('🚀 Đang bắt đầu trò chơi...', 'success', 3000);
         }
 
         function stopGame() {
             if (confirm('Bạn có chắc muốn dừng trò chơi?')) {
                 socket.emit('stopGame', currentRoom);
-                showMessage('Đã dừng trò chơi', 'success');
+                showToast('⏹️ Đã dừng trò chơi', 'warning', 3000);
             }
         }
 
         function submitCard() {
             if (selectedCard === null) {
-                showMessage('Vui lòng chọn một meme card!', 'error');
+                showToast('⚠️ Vui lòng chọn một meme card!', 'warning', 4000);
                 return;
             }
             
@@ -1983,7 +2191,7 @@
             const selectedCardData = playerCards[selectedCard];
             if (!selectedCardData || !selectedCardData._id) {
                 console.error('Card data error:', selectedCardData);
-                showMessage('Lỗi: Không tìm thấy thông tin card!', 'error');
+                showToast('❌ Lỗi: Không tìm thấy thông tin card!', 'error', 4000);
                 return;
             }
             
@@ -2023,8 +2231,23 @@
         function leaveRoom() {
             if (confirm('Bạn có chắc muốn rời phòng?')) {
                 socket.emit('leaveRoom', currentRoom);
-                showMessage('Đang rời phòng...', 'success');
+                showToast('🚪 Đang rời phòng...', 'info', 2000);
                 setTimeout(() => window.location.href = '/', 1000);
+            }
+        }
+
+        function kickPlayer(playerNameToKick) {
+            if (!isHost) {
+                showToast('❌ Chỉ host mới có thể kick player!', 'error', 4000);
+                return;
+            }
+            
+            if (confirm(`Bạn có chắc muốn kick ${playerNameToKick} khỏi phòng?`)) {
+                socket.emit('kickPlayer', { 
+                    roomId: currentRoom, 
+                    playerNameToKick: playerNameToKick 
+                });
+                showToast(`🦶 Đang kick ${playerNameToKick}...`, 'warning', 3000);
             }
         }
 
@@ -2040,7 +2263,7 @@
                     btn.style.background = '';
                 }, 2000);
             }).catch(() => {
-                showMessage('Không thể sao chép. Mã phòng: ' + currentRoom, 'error');
+                showToast('📋 Không thể sao chép. Mã phòng: ' + currentRoom, 'warning', 5000);
             });
         }
 
@@ -2074,22 +2297,81 @@
             }
         }
 
-        function showMessage(message, type = 'success') {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${type}`;
-            messageDiv.innerHTML = `
-                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-                ${message}
+        // Toast notification system
+        function showToast(message, type = 'success', duration = 5000) {
+            const toastContainer = document.getElementById('toastContainer');
+            
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            // Get appropriate icon for type
+            const iconMap = {
+                success: 'check-circle',
+                error: 'exclamation-circle',
+                warning: 'exclamation-triangle',
+                info: 'info-circle'
+            };
+            
+            const icon = iconMap[type] || 'info-circle';
+            
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    <i class="fas fa-${icon}"></i>
+                </div>
+                <div class="toast-content">${message}</div>
+                <button class="toast-close" onclick="closeToast(this)">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="toast-progress"></div>
             `;
             
-            const gameContainer = document.querySelector('.game-container');
-            gameContainer.insertBefore(messageDiv, gameContainer.firstChild);
+            // Add to container
+            toastContainer.appendChild(toast);
+            
+            // Trigger animation
+            setTimeout(() => {
+                toast.classList.add('show');
+            }, 10);
+            
+            // Start progress bar animation
+            const progressBar = toast.querySelector('.toast-progress');
+            if (progressBar) {
+                progressBar.style.width = '100%';
+                progressBar.style.transition = `width ${duration}ms linear`;
+                setTimeout(() => {
+                    progressBar.style.width = '0%';
+                }, 50);
+            }
+            
+            // Auto remove after duration
+            setTimeout(() => {
+                removeToast(toast);
+            }, duration);
+            
+            return toast;
+        }
+        
+        function closeToast(button) {
+            const toast = button.closest('.toast');
+            removeToast(toast);
+        }
+        
+        function removeToast(toast) {
+            if (!toast || !toast.parentNode) return;
+            
+            toast.classList.remove('show');
             
             setTimeout(() => {
-                if (messageDiv.parentNode) {
-                    messageDiv.remove();
+                if (toast.parentNode) {
+                    toast.parentNode.removeChild(toast);
                 }
-            }, 5000);
+            }, 300);
+        }
+        
+        // Alias for backward compatibility
+        function showMessage(message, type = 'success') {
+            showToast(message, type);
         }
 
         // Enter key to send message

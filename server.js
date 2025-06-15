@@ -745,29 +745,101 @@ io.on('connection', (socket) => {
       if (playerIndex === -1) return;
 
       const player = room.players[playerIndex];
-      room.players.splice(playerIndex, 1);
+      const isHost = player.isHost;
 
-      console.log(`🚪 ${player.name} manually left room ${roomId}`);
+      console.log(`🚪 ${player.name} manually left room ${roomId} (Host: ${isHost})`);
 
       // Leave socket room
       socket.leave(roomId);
 
-      // Check if room should be deleted
-      if (room.players.length === 0) {
-        await deleteRoom(roomId);
+      // If host leaves, close the entire room and kick everyone
+      if (isHost) {
+        await closeRoomDueToHostLeaving(roomId, player.name);
       } else {
-        // Update database
-        await Room.updateOne({ roomId }, { players: room.players });
-        
-        // Notify remaining players
-        io.to(roomId).emit('playerLeft', {
-          playerName: player.name,
-          players: room.players
-        });
+        // Normal player leaving
+        room.players.splice(playerIndex, 1);
+
+        // Check if room should be deleted
+        if (room.players.length === 0) {
+          await deleteRoom(roomId);
+        } else {
+          // Update database
+          await Room.updateOne({ roomId }, { players: room.players });
+          
+          // Notify remaining players
+          io.to(roomId).emit('playerLeft', {
+            playerName: player.name,
+            players: room.players
+          });
+        }
       }
       
     } catch (error) {
       console.error('Leave room error:', error);
+    }
+  });
+
+  // Kick player (host only)
+  socket.on('kickPlayer', async (data) => {
+    try {
+      const { roomId, playerNameToKick } = data;
+      const room = gameRooms.get(roomId);
+      
+      if (!room) {
+        socket.emit('kickError', { message: 'Phòng không tồn tại!' });
+        return;
+      }
+
+      // Check if socket user is host
+      const hostPlayer = room.players.find(p => p.socketId === socket.id);
+      if (!hostPlayer || !hostPlayer.isHost) {
+        socket.emit('kickError', { message: 'Chỉ host mới có thể kick player!' });
+        return;
+      }
+
+      // Find player to kick
+      const playerToKick = room.players.find(p => p.name === playerNameToKick);
+      if (!playerToKick) {
+        socket.emit('kickError', { message: 'Không tìm thấy player cần kick!' });
+        return;
+      }
+
+      // Can't kick host
+      if (playerToKick.isHost) {
+        socket.emit('kickError', { message: 'Không thể kick host!' });
+        return;
+      }
+
+      console.log(`🦶 Host ${hostPlayer.name} is kicking ${playerNameToKick} from room ${roomId}`);
+
+      // Remove player from room
+      const playerIndex = room.players.findIndex(p => p.name === playerNameToKick);
+      room.players.splice(playerIndex, 1);
+
+      // Notify the kicked player
+      io.to(playerToKick.socketId).emit('kickedToLobby', {
+        reason: 'kicked',
+        message: `Bạn đã bị kick khỏi phòng bởi host ${hostPlayer.name}`
+      });
+
+      // Remove kicked player from socket room
+      io.sockets.sockets.get(playerToKick.socketId)?.leave(roomId);
+
+      // Update database
+      await Room.updateOne({ roomId }, { players: room.players });
+
+      // Notify remaining players
+      io.to(roomId).emit('playerKicked', {
+        kickedPlayerName: playerNameToKick,
+        kickedBy: hostPlayer.name,
+        players: room.players
+      });
+
+      console.log(`✅ ${playerNameToKick} has been kicked from room ${roomId} by ${hostPlayer.name}`);
+
+    } catch (error) {
+      console.error('Kick player error:', error);
+      socket.emit('kickError', { message: 'Có lỗi xảy ra khi kick player!' });
     }
   });
 
@@ -1059,7 +1131,7 @@ async function handlePlayerDisconnect(socketId) {
   
   console.log(`👋 ${disconnectedPlayer.name} disconnected from room ${disconnectedRoomId} (Creator: ${isCreator})`);
   
-  // If this is a room creator, give grace period
+  // If this is a room creator, give grace period then close room
   if (isCreator) {
     console.log(`⏳ Room creator ${disconnectedPlayer.name} disconnected, giving 8 seconds grace period...`);
     
@@ -1077,8 +1149,8 @@ async function handlePlayerDisconnect(socketId) {
       if (room) {
         const creatorStillExists = room.players.find(p => p.name === disconnectedPlayer.name && p.socketId !== socketId);
         if (!creatorStillExists) {
-          console.log(`⌛ Grace period expired, cleaning up room ${disconnectedRoomId}`);
-          await performRoomCleanup(disconnectedRoomId, socketId);
+          console.log(`⌛ Grace period expired, host left - closing room ${disconnectedRoomId}`);
+          await closeRoomDueToHostLeaving(disconnectedRoomId, disconnectedPlayer.name);
         } else {
           console.log(`✅ Creator ${disconnectedPlayer.name} reconnected successfully`);
         }
@@ -1123,6 +1195,45 @@ async function performRoomCleanup(roomId, socketId) {
   }
 }
 
+async function closeRoomDueToHostLeaving(roomId, hostName) {
+  try {
+    const room = gameRooms.get(roomId);
+    if (!room) return;
+
+    console.log(`🚪 Closing room ${roomId} due to host ${hostName} leaving`);
+
+    // Clear any running countdown intervals
+    if (room.countdownInterval) {
+      clearInterval(room.countdownInterval);
+      room.countdownInterval = null;
+    }
+
+    // Notify all players that host left and room is closing
+    io.to(roomId).emit('hostLeft', {
+      hostName: hostName,
+      message: `Host ${hostName} đã rời phòng. Phòng sẽ bị đóng và tất cả người chơi về sảnh.`
+    });
+
+    // Give players 3 seconds to see the message before redirecting
+    setTimeout(() => {
+      // Kick all remaining players to lobby
+      io.to(roomId).emit('kickedToLobby', {
+        reason: 'host_left',
+        message: 'Host đã rời phòng, bạn được chuyển về sảnh'
+      });
+
+      // Remove all players from socket room
+      io.in(roomId).socketsLeave(roomId);
+
+      // Delete the room
+      deleteRoom(roomId);
+    }, 3000);
+
+  } catch (error) {
+    console.error(`❌ Error closing room due to host leaving ${roomId}:`, error);
+  }
+}
+
 async function deleteRoom(roomId) {
   try {
     // Remove from memory
@@ -1131,10 +1242,10 @@ async function deleteRoom(roomId) {
     // Remove from database
     await Room.deleteOne({ roomId });
     
-    console.log(`🗑️ Room ${roomId} has been deleted (empty)`);
+    console.log(`🗑️ Room ${roomId} has been deleted`);
     
     // Notify all clients in room (if any) that room is closing
-    io.to(roomId).emit('roomDeleted', { message: 'Room has been closed due to no players' });
+    io.to(roomId).emit('roomDeleted', { message: 'Room has been closed' });
     
     // Clear the socket room
     io.in(roomId).socketsLeave(roomId);
