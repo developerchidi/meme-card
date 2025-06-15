@@ -46,6 +46,7 @@ const helmetConfig = {
       defaultSrc: ["'self'"],
       styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
       scriptSrc: ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com"],
+      scriptSrcAttr: ["'unsafe-inline'", "'unsafe-hashes'"],
       fontSrc: ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com", "data:"],
       imgSrc: ["'self'", "data:", "https:"],
       connectSrc: ["'self'", "wss:", "ws:"]
