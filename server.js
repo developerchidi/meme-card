@@ -41,8 +41,8 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Serve static files from img_libs folder
-app.use('/img_libs', express.static(path.join(__dirname, 'img_libs')));
+// Images are now served from Cloudinary, no need for local static serving
+// app.use('/img_libs', express.static(path.join(__dirname, 'img_libs'))); // Removed - using Cloudinary
 
 // MongoDB Connection with better error handling
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -448,8 +448,15 @@ io.on('connection', (socket) => {
       // Notify all players that game started with their cards
       room.players.forEach(player => {
         console.log(`🎴 Sending cards to ${player.name}:`, player.cards.map(c => ({ id: c._id, name: c.name })));
+        
+        // Ensure cards use Cloudinary URLs
+        const cardsWithCloudinaryUrls = player.cards.map(card => ({
+          ...card.toObject ? card.toObject() : card,
+          imageUrl: card.cloudinaryUrl || card.imageUrl // Use Cloudinary URL if available
+        }));
+        
         io.to(player.socketId).emit('gameStarted', {
-          cards: player.cards,
+          cards: cardsWithCloudinaryUrls,
           players: room.players,
           status: 'playing'
         });
@@ -582,7 +589,7 @@ io.on('connection', (socket) => {
         playerName: player.name,
         card: JSON.parse(JSON.stringify({
           _id: submittedCard._id,
-          imageUrl: submittedCard.imageUrl,
+          imageUrl: submittedCard.cloudinaryUrl || submittedCard.imageUrl, // Use Cloudinary URL if available
           description: submittedCard.description,
           tags: submittedCard.tags || []
         }))

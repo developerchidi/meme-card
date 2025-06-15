@@ -5,6 +5,14 @@ const memeTemplateSchema = new mongoose.Schema({
     type: String, 
     required: true 
   },
+  cloudinaryUrl: {
+    type: String,
+    required: true
+  },
+  publicId: {
+    type: String,
+    required: true
+  },
   description: { 
     type: String,
     trim: true
