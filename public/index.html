@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Meme Card Game - Trò chơi thẻ bài hài hước Việt Nam!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --dark: #1f2937;
+            --light: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+            color: var(--gray-800);
+        }
+
+        /* Background Pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 25% 25%, rgba(255,255,255,0.1) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(255,255,255,0.1) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            max-width: 800px;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            font-size: 4rem;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+        }
+
+        .title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff, #e2e8f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            line-height: 1.1;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            font-size: 1.25rem;
+            color: rgba(255,255,255,0.9);
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+        }
+
+        .description {
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.8);
+            line-height: 1.6;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Main Content */
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            max-width: 1000px;
+            width: 100%;
+            align-items: start;
+        }
+
+        /* Game Card */
+        .game-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 
+                0 20px 25px -5px rgba(0, 0, 0, 0.1),
+                0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+        }
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: 0.5rem;
+        }
+
+        .card-subtitle {
+            color: var(--gray-500);
+            font-size: 0.95rem;
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            color: var(--gray-700);
+            margin-bottom: 0.5rem;
+            font-size: 0.95rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.875rem 1rem;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            background: var(--light);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-input::placeholder {
+            color: var(--gray-400);
+            font-weight: 400;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.875rem 1.5rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            font-family: inherit;
+            min-height: 48px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.2);
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 12px -1px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+            box-shadow: 0 4px 6px -1px rgba(236, 72, 153, 0.2);
+        }
+
+        .btn-secondary:hover {
+            background: #db2777;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 12px -1px rgba(236, 72, 153, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+            color: var(--gray-400);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--gray-200);
+        }
+
+        .divider span {
+            padding: 0 1rem;
+            background: white;
+        }
+
+        /* Features Section */
+        .features {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 
+                0 20px 25px -5px rgba(0, 0, 0, 0.1),
+                0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .features-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .features-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: 0.5rem;
+        }
+
+        .features-subtitle {
+            color: var(--gray-500);
+            font-size: 0.95rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 16px;
+            background: var(--gray-50);
+            border: 1px solid var(--gray-100);
+            transition: all 0.2s ease;
+        }
+
+        .feature-item:hover {
+            background: white;
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 12px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .feature-icon.users { background: linear-gradient(135deg, var(--primary), var(--primary-dark)); }
+        .feature-icon.meme { background: linear-gradient(135deg, var(--secondary), #db2777); }
+        .feature-icon.vote { background: linear-gradient(135deg, var(--accent), #0891b2); }
+        .feature-icon.trophy { background: linear-gradient(135deg, var(--warning), #d97706); }
+
+        .feature-content h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 0.25rem;
+        }
+
+        .feature-content p {
+            font-size: 0.9rem;
+            color: var(--gray-600);
+            line-height: 1.4;
+        }
+
+        /* Guide Button */
+        .guide-section {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        /* Messages */
+        .message {
+            padding: 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            font-weight: 500;
+            display: none;
+            text-align: center;
+        }
+
+        .message.error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .message.success {
+            background: #f0fdf4;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 2% auto;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            padding: 2rem;
+            border-radius: 20px 20px 0 0;
+            text-align: center;
+            position: relative;
+            flex-shrink: 0;
+        }
+
+        .modal-header h2 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-header p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .modal-close {
+            position: absolute;
+            right: 1.5rem;
+            top: 1.5rem;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .modal-body {
+            padding: 2rem;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .guide-section-modal {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: var(--gray-50);
+            border-radius: 16px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .guide-section-modal h3 {
+            color: var(--gray-800);
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .guide-section-modal h3 i {
+            color: var(--primary);
+        }
+
+        .guide-section-modal p, 
+        .guide-section-modal li {
+            color: var(--gray-600);
+            line-height: 1.6;
+            margin-bottom: 0.5rem;
+        }
+
+        .guide-section-modal ol, 
+        .guide-section-modal ul {
+            padding-left: 1.5rem;
+        }
+
+        .highlight {
+            background: var(--primary);
+            color: white;
+            padding: 0.125rem 0.375rem;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        /* Footer */
+        .footer {
+            margin-top: 4rem;
+            text-align: center;
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+        }
+
+        .footer p {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .title {
+                font-size: 2.5rem;
+            }
+
+            .logo {
+                font-size: 3rem;
+            }
+
+            .main-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .game-card,
+            .features {
+                padding: 2rem;
+            }
+
+            .modal-content {
+                width: 95%;
+                margin: 5% auto;
+            }
+
+            .modal-body {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header {
+                margin-bottom: 2rem;
+            }
+
+            .title {
+                font-size: 2rem;
+            }
+
+            .game-card,
+            .features {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-container">
+                <div class="logo">🎮</div>
+                <div class="logo">🃏</div>
+            </div>
+            <h1 class="title">Meme Card Game</h1>
+            <p class="subtitle">Trò chơi thẻ bài hài hước Việt Nam</p>
+            <!-- <p class="description">
+                Tham gia cùng bạn bè trong trò chơi kết hợp meme templates với caption hài hước! 
+                Sáng tạo, bình chọn và cười thả ga với những tình huống quen thuộc của người Việt.
+            </p> -->
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Game Card -->
+            <div class="game-card">
+                <div class="card-header">
+                    <h2 class="card-title">Bắt đầu chơi ngay</h2>
+                    <p class="card-subtitle">Tạo phòng mới hoặc tham gia phòng có sẵn</p>
+                </div>
+
+                <div class="message error" id="errorMessage"></div>
+                <div class="message success" id="successMessage"></div>
+
+                <div class="form-group">
+                    <label class="form-label" for="playerName">
+                        <i class="fas fa-user"></i> Tên hiển thị
+                    </label>
+                    <input type="text" id="playerName" class="form-input" placeholder="Nhập tên của bạn..." maxlength="20">
+                </div>
+
+                <button class="btn btn-primary btn-full" onclick="createRoom()">
+                    <i class="fas fa-plus"></i>
+                    Tạo phòng mới
+                </button>
+
+                <div class="divider">
+                    <span>hoặc</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="roomCode">
+                        <i class="fas fa-key"></i> Mã phòng
+                    </label>
+                    <input type="text" id="roomCode" class="form-input" placeholder="Nhập mã phòng 6 ký tự..." maxlength="6">
+                </div>
+
+                <button class="btn btn-secondary btn-full" onclick="joinRoom()">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Tham gia phòng
+                </button>
+
+                <div class="guide-section">
+                    <button class="btn btn-outline btn-full" onclick="showGuide()">
+                        <i class="fas fa-question-circle"></i>
+                        Hướng dẫn chơi
+                    </button>
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div class="features">
+                <div class="features-header">
+                    <h2 class="features-title">Tính năng nổi bật</h2>
+                    <p class="features-subtitle">Những điều thú vị đang chờ bạn khám phá</p>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-item">
+                        <div class="feature-icon users">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h3>Multiplayer</h3>
+                            <p>Chơi cùng 3-8 người bạn trong thời gian thực với kết nối ổn định</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon meme">
+                            <i class="fas fa-laugh"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h3>Meme Việt Nam</h3>
+                            <p>Hàng trăm meme templates và caption quen thuộc với người Việt</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon vote">
+                            <i class="fas fa-vote-yea"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h3>Bình chọn công bằng</h3>
+                            <p>Hệ thống vote minh bạch, mọi người đều có cơ hội chiến thắng</p>
+                        </div>
+                    </div>
+
+                    <div class="feature-item">
+                        <div class="feature-icon trophy">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="feature-content">
+                            <h3>Thi đấu hấp dẫn</h3>
+                            <p>Người đầu tiên đạt 7 điểm sẽ trở thành nhà vô địch</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>🎮 Meme Card Game - Tạo ra những khoảnh khắc vui vẻ cùng bạn bè!</p>
+            <p>Dev by <a href="https://www.facebook.com/nguyen.thanh.loc.978000/" target="_blank" style="color: yellow; text-decoration: none; font-weight: 600;">Nguyễn Thành Lộc</a></p>
+        </div>
+    </div>
+
+    <!-- Guide Modal -->
+    <div id="guideModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button class="modal-close" onclick="closeGuide()">
+                    <i class="fas fa-times"></i>
+                </button>
+                <h2><i class="fas fa-gamepad"></i> Hướng dẫn chơi</h2>
+                <p>Tìm hiểu cách chơi và trở thành bậc thầy meme!</p>
+            </div>
+            <div class="modal-body">
+                <div class="guide-section-modal">
+                    <h3><i class="fas fa-info-circle"></i> Giới thiệu</h3>
+                    <p>Meme Card Game là trò chơi kết hợp meme templates với caption hài hước. Mục tiêu là tạo ra những meme vui nhộn nhất để giành chiến thắng!</p>
+                </div>
+
+                <div class="guide-section-modal">
+                    <h3><i class="fas fa-users"></i> Cách tham gia</h3>
+                    <ol>
+                        <li>Nhập tên hiển thị của bạn</li>
+                        <li><strong>Tạo phòng mới:</strong> Bạn sẽ trở thành host và nhận mã phòng 6 ký tự</li>
+                        <li><strong>Tham gia phòng:</strong> Nhập mã phòng do host chia sẻ</li>
+                        <li>Chờ đủ <span class="highlight">3-8 người chơi</span> để bắt đầu</li>
+                    </ol>
+                </div>
+
+                <div class="guide-section-modal">
+                    <h3><i class="fas fa-play"></i> Cách chơi</h3>
+                    <ol>
+                        <li><strong>Nhận thẻ:</strong> Mỗi người chơi nhận 7 meme templates</li>
+                        <li><strong>Đọc caption:</strong> Hệ thống hiển thị một câu caption (ví dụ: "Khi crush online")</li>
+                        <li><strong>Chọn meme:</strong> Trong 30 giây, chọn meme template phù hợp nhất với caption</li>
+                        <li><strong>Bình chọn:</strong> Sau khi tất cả submit, vote cho meme hay nhất trong 20 giây</li>
+                        <li><strong>Tính điểm:</strong> Meme có nhiều vote nhất được 1 điểm</li>
+                    </ol>
+                </div>
+
+                <div class="guide-section-modal">
+                    <h3><i class="fas fa-trophy"></i> Chiến thắng</h3>
+                    <p>Người chơi đầu tiên đạt <span class="highlight">7 điểm</span> sẽ chiến thắng!</p>
+                    <p>Mỗi round, meme nhận được nhiều vote nhất sẽ được 1 điểm. Nếu hòa, tất cả người có vote cao nhất đều được điểm.</p>
+                </div>
+
+                <div class="guide-section-modal">
+                    <h3><i class="fas fa-crown"></i> Quyền Host</h3>
+                    <ul>
+                        <li>Bắt đầu và dừng trò chơi</li>
+                        <li>Kick người chơi không phù hợp</li>
+                        <li>Chia sẻ mã phòng cho bạn bè</li>
+                    </ul>
+                </div>
+
+                <div class="guide-section-modal">
+                    <h3><i class="fas fa-lightbulb"></i> Mẹo chơi hay</h3>
+                    <ul>
+                        <li><strong>Hiểu context:</strong> Chọn meme phù hợp với tình huống Việt Nam</li>
+                        <li><strong>Suy nghĩ nhanh:</strong> Có giới hạn thời gian, đừng do dự quá lâu</li>
+                        <li><strong>Sáng tạo:</strong> Đôi khi meme "lạ" lại thu hút vote hơn</li>
+                        <li><strong>Vui vẻ:</strong> Đây là trò chơi giải trí, hãy cười thả ga!</li>
+                    </ul>
+                </div>
+
+                <div class="guide-section-modal">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Lưu ý</h3>
+                    <ul>
+                        <li>Không thể vote cho meme của chính mình</li>
+                        <li>Mỗi người chỉ vote được 1 lần mỗi round</li>
+                        <li>Nếu mất kết nối, có thể reconnect bằng cách refresh trang</li>
+                        <li>Host rời phòng sẽ kết thúc game cho tất cả</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Show/hide guide modal
+        function showGuide() {
+            document.getElementById('guideModal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeGuide() {
+            document.getElementById('guideModal').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('guideModal');
+            if (event.target == modal) {
+                closeGuide();
+            }
+        }
+
+        // Show message functions
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Create room function
+        async function createRoom() {
+            const playerName = document.getElementById('playerName').value.trim();
+            
+            if (!playerName) {
+                showError('Vui lòng nhập tên của bạn!');
+                return;
+            }
+
+            if (playerName.length < 2) {
+                showError('Tên phải có ít nhất 2 ký tự!');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/create-room', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ playerName })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Store player info
+                    sessionStorage.setItem('playerName', playerName);
+                    sessionStorage.setItem('isHost', 'true');
+                    
+                    showSuccess(`Phòng ${data.roomId} đã được tạo! Đang chuyển hướng...`);
+                    
+                    // Redirect to game room
+                    setTimeout(() => {
+                        window.location.href = `/game/${data.roomId}`;
+                    }, 1500);
+                } else {
+                    showError(data.error || 'Không thể tạo phòng. Vui lòng thử lại!');
+                }
+            } catch (error) {
+                console.error('Create room error:', error);
+                showError('Lỗi kết nối. Vui lòng kiểm tra internet và thử lại!');
+            }
+        }
+
+        // Join room function
+        async function joinRoom() {
+            const playerName = document.getElementById('playerName').value.trim();
+            const roomCode = document.getElementById('roomCode').value.trim().toUpperCase();
+            
+            if (!playerName) {
+                showError('Vui lòng nhập tên của bạn!');
+                return;
+            }
+
+            if (!roomCode) {
+                showError('Vui lòng nhập mã phòng!');
+                return;
+            }
+
+            if (roomCode.length !== 6) {
+                showError('Mã phòng phải có đúng 6 ký tự!');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/join-room', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ playerName, roomId: roomCode })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Store player info
+                    sessionStorage.setItem('playerName', playerName);
+                    sessionStorage.setItem('isHost', 'false');
+                    
+                    showSuccess(`Đã tham gia phòng ${roomCode}! Đang chuyển hướng...`);
+                    
+                    // Redirect to game room
+                    setTimeout(() => {
+                        window.location.href = `/game/${roomCode}`;
+                    }, 1500);
+                } else {
+                    showError(data.error || 'Không thể tham gia phòng. Vui lòng kiểm tra mã phòng!');
+                }
+            } catch (error) {
+                console.error('Join room error:', error);
+                showError('Lỗi kết nối. Vui lòng kiểm tra internet và thử lại!');
+            }
+        }
+
+        // Enter key handlers
+        document.getElementById('playerName').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                createRoom();
+            }
+        });
+
+        document.getElementById('roomCode').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                joinRoom();
+            }
+        });
+
+        // Auto-uppercase room code
+        document.getElementById('roomCode').addEventListener('input', function(e) {
+            e.target.value = e.target.value.toUpperCase();
+        });
+
+        // Focus on player name input when page loads
+        window.addEventListener('load', function() {
+            document.getElementById('playerName').focus();
+        });
+    </script>
+</body>
+</html> 

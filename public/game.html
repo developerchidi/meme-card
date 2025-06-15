@@ -1,0 +1,2123 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎮 Meme Card Game - Đang chơi</title>}
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary: #ec4899;
+            --accent: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --success: #22c55e;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --radius-sm: 0.375rem;
+            --radius: 0.5rem;
+            --radius-md: 0.75rem;
+            --radius-lg: 1rem;
+            --radius-xl: 1.5rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            color: var(--gray-800);
+            line-height: 1.6;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .game-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            padding-top: 0;
+        }
+
+        /* Header Styles */
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            /* position: sticky; */
+            top: 1rem;
+            z-index: 100;
+        }
+
+        .room-info {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .room-code {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-lg);
+            font-weight: 700;
+            font-size: 1.1rem;
+            letter-spacing: 0.1em;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .room-code::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .game-status {
+            font-weight: 600;
+            color: var(--gray-600);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .copy-btn {
+            background: linear-gradient(135deg, var(--accent) 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .copy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Players Bar */
+        .players-bar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .players-list {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding-bottom: 0.5rem;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) transparent;
+        }
+
+        .players-list::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .players-list::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 3px;
+        }
+
+        .players-list::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 3px;
+        }
+
+        .players-list::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+        }
+
+        .player-card {
+            background: linear-gradient(135deg, var(--gray-100) 0%, var(--gray-50) 100%);
+            color: var(--gray-800);
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: var(--shadow);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            min-width: 180px;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .player-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .player-card.judge {
+            background: linear-gradient(135deg, var(--secondary) 0%, #db2777 100%);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .player-card.host {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .player-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent) 0%, #059669 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .player-score {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 700;
+        }
+
+        /* Main Game Layout */
+        .main-game {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 1rem;
+            min-height: 0;
+            margin-bottom: 1rem;
+        }
+
+        .game-area {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            overflow: hidden;
+        }
+
+        /* Caption Display */
+        .caption-display {
+            text-align: center;
+        }
+
+        .caption-card-large {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 3rem 2rem;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            margin: 0 auto;
+            max-width: 600px;
+            position: relative;
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            overflow: hidden;
+        }
+
+        .caption-card-large::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .caption-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .caption-text {
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1.3;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .caption-info {
+            margin-top: 1.5rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--gray-600);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            min-height: 0;
+        }
+
+        .player-hand {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            height: 300px;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .hand-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card-count {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .hand-subtitle {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+            margin-bottom: 1rem;
+            text-align: center;
+            font-style: italic;
+        }
+
+        .meme-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 0.75rem;
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 0.5rem;
+        }
+
+        .meme-card {
+            background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
+            color: var(--gray-800);
+            padding: 0.75rem;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 0.8rem;
+            position: relative;
+            border: 2px solid var(--gray-200);
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .meme-card:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary);
+        }
+
+        .meme-card.selected {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border-color: var(--primary);
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Game Actions */
+        .game-actions {
+            height: 250px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 0.75rem;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--accent) 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, var(--success) 0%, #16a34a 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning) 0%, #d97706 100%);
+            color: white;
+        }
+
+        .action-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .action-btn:disabled {
+            background: var(--gray-300);
+            color: var(--gray-500);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Chat Area */
+        .chat-area {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-xl);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+            padding-right: 0.5rem;
+        }
+
+        .chat-message {
+            margin-bottom: 0.75rem;
+            padding: 0.75rem;
+            border-radius: var(--radius-lg);
+            background: var(--gray-50);
+            font-size: 0.875rem;
+            border-left: 3px solid var(--primary);
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.875rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .chat-input input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .chat-input button {
+            padding: 0.75rem 1rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .chat-input button:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Utility Classes */
+        .waiting-message {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--gray-600);
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .host-badge {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius);
+            font-size: 0.75rem;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .main-game {
+                grid-template-columns: 1fr;
+                margin-bottom: 0.5rem;
+            }
+            
+            .sidebar {
+                order: -1;
+                flex-direction: row;
+                gap: 1rem;
+            }
+            
+            .game-actions 
+            .chat-area {
+                flex: 1;
+                min-height: 200px;
+            }
+            
+            .player-hand {
+                height: 140px;
+            }
+            
+            .meme-cards-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .meme-card {
+                min-height: 60px;
+                font-size: 0.75rem;
+                padding: 0.5rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 0.5rem;
+            }
+            
+            .header {
+                flex-direction: column;
+                padding: 1rem;
+                position: static;
+            }
+            
+            .room-info {
+                justify-content: center;
+            }
+            
+            .sidebar {
+                flex-direction: column;
+            }
+            
+            .player-hand {
+                height: 120px;
+            }
+            
+            .meme-cards-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+            
+            .meme-card {
+                min-height: 50px;
+                font-size: 0.7rem;
+                padding: 0.4rem;
+            }
+            
+            .game-area {
+                padding: 1rem;
+            }
+            
+            .caption-text {
+                font-size: 1.5rem;
+            }
+            
+            .sidebar {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .players-list {
+                justify-content: center;
+            }
+            
+            .player-card {
+                min-width: 100px;
+                padding: 0.75rem 1rem;
+            }
+            
+            .caption-card-large {
+                padding: 2rem 1rem;
+            }
+            
+            .caption-text {
+                font-size: 1.25rem;
+            }
+        }
+
+        /* Player Hand Trigger Button */
+        .player-hand-trigger {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            z-index: 1000;
+        }
+
+        .hand-btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: var(--radius-xl);
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            box-shadow: var(--shadow-xl);
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hand-btn:hover {
+            transform: translateY(-4px) scale(1.05);
+            box-shadow: 0 25px 35px -5px rgb(0 0 0 / 0.2), 0 10px 15px -8px rgb(0 0 0 / 0.1);
+        }
+
+        .hand-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        .card-count {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-lg);
+            font-size: 0.9rem;
+            font-weight: 800;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-xl);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            width: 100%;
+            max-width: 90%;
+            height: 90vh;
+            overflow: hidden;
+            animation: slideUp 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(50px) scale(0.9);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            padding: 2rem 2rem 1rem 2rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .card-count-modal {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: var(--radius-lg);
+            font-size: 0.9rem;
+            font-weight: 800;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--gray-500);
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: var(--radius);
+            transition: all 0.2s ease;
+        }
+
+        .modal-close:hover {
+            background: rgba(0, 0, 0, 0.1);
+            color: var(--gray-700);
+        }
+
+        .modal-body {
+            padding: 1rem 2rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .hand-subtitle {
+            text-align: center;
+            color: var(--gray-600);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        /* Player Cards Grid - 2 rows x 3 columns */
+        .player-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 1rem;
+            width: 100%;
+            height: 100%;
+        }
+
+        .meme-card {
+            background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
+            border: 3px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            padding: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            aspect-ratio: 16/9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .meme-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .meme-card.selected {
+            border-color: var(--primary);
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%);
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .meme-card.selected::before {
+            content: '✓';
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--primary);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .modal-footer {
+            padding: 1rem 2rem 2rem 2rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--gray-400) 0%, var(--gray-500) 100%);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, var(--gray-500) 0%, var(--gray-600) 100%);
+        }
+
+        /* Responsive Modal */
+        @media (max-width: 768px) {
+            .modal-content {
+                width: 98%;
+                height: 90vh;
+                margin: 0.5rem;
+            }
+            
+            .modal-header, .modal-body, .modal-footer {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            
+            .player-cards-grid {
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-rows: repeat(3, 1fr);
+                gap: 0.75rem;
+            }
+            
+            .meme-card {
+                aspect-ratio: 4/3;
+            }
+            
+            .hand-btn {
+                padding: 0.75rem 1.5rem;
+                font-size: 1rem;
+            }
+            
+            .player-hand-trigger {
+                bottom: 1rem;
+                right: 1rem;
+            }
+        }
+
+        /* Responsive Voting & Results */
+        @media (max-width: 768px) {
+            #votingArea > div:first-child,
+            #resultsArea div[style*="grid-template-columns"] {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.75rem !important;
+                max-width: 600px !important;
+            }
+            
+            .voting-card,
+            #resultsArea div[style*="width: 280px"] {
+                width: 200px !important;
+                height: 112px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .modal-content {
+                width: 100%;
+                height: 100vh;
+                border-radius: 0;
+            }
+            
+            .player-cards-grid {
+                grid-template-columns: 1fr;
+                grid-template-rows: repeat(6, 1fr);
+                gap: 0.5rem;
+            }
+            
+            .meme-card {
+                aspect-ratio: 3/2;
+            }
+            
+            .modal-footer {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .modal-header {
+                padding: 1rem;
+            }
+            
+            .modal-body {
+                padding: 0.5rem 1rem;
+            }
+            
+            #votingArea > div:first-child,
+            #resultsArea div[style*="grid-template-columns"] {
+                grid-template-columns: 1fr !important;
+                gap: 0.5rem !important;
+                max-width: 300px !important;
+            }
+            
+            .voting-card,
+            #resultsArea div[style*="width: 280px"] {
+                width: 250px !important;
+                height: 140px !important;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Success/Error Messages */
+        .message {
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-lg);
+            margin-bottom: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .message.success {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+        }
+
+        .message.error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="room-info">
+                <div class="room-code" id="roomCode">
+                    <div class="loading"></div>
+                </div>
+                <div class="game-status" id="gameStatus">
+                    <div class="status-indicator"></div>
+                    Đang chờ người chơi...
+                </div>
+            </div>
+            <button onclick="copyRoomCode()" class="copy-btn">
+                <i class="fas fa-copy"></i>
+                Sao chép mã
+            </button>
+        </div>
+
+        <!-- Players Bar -->
+        <div class="players-bar">
+            <div class="players-list" id="playersList">
+                <!-- Players will be added here -->
+            </div>
+        </div>
+
+        <!-- Main Game Area -->
+        <div class="main-game">
+            <div class="game-area">
+                <!-- Caption Display -->
+                <div class="caption-display" id="captionDisplay" style="display: none;">
+                    <div class="caption-card-large">
+                        <div class="caption-icon">💭</div>
+                        <div class="caption-text" id="captionText">Đang tải...</div>
+                    </div>
+                    <div class="caption-info" id="captionInfo">
+                        Chọn meme phù hợp nhất với caption này!
+                    </div>
+                    <div class="countdown-display" id="submittingCountdown" style="display: none; text-align: center; margin-top: 1.5rem; padding: 1rem; background: rgba(255,255,255,0.1); border-radius: var(--radius-lg); color: var(--gray-700); font-size: 1.1rem; font-weight: 600;">
+                        <i class="fas fa-clock"></i> Thời gian còn lại: <span id="submittingTimer">30</span>s
+                    </div>
+                </div>
+
+                <!-- Waiting Message -->
+                <div class="waiting-message" id="waitingMessage">
+                    <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                    <br>
+                    Đang chờ thêm người chơi...
+                    <br>
+                    <small style="opacity: 0.7;">Cần ít nhất 3 người để bắt đầu</small>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <!-- Game Actions -->
+                <div class="game-actions">
+                    <button id="submitBtn" class="action-btn btn-submit" onclick="submitCard()" disabled>
+                        <i class="fas fa-paper-plane"></i>
+                        Gửi lựa chọn
+                    </button>
+                    <button id="startBtn" class="action-btn btn-start" onclick="startGame()" style="display: none;">
+                        <i class="fas fa-play"></i>
+                        Bắt đầu trò chơi
+                    </button>
+                    <button id="stopBtn" class="action-btn btn-danger" onclick="stopGame()" style="display: none;">
+                        <i class="fas fa-stop"></i>
+                        Dừng trò chơi
+                    </button>
+                    <button id="leaveBtn" class="action-btn btn-warning" onclick="leaveRoom()">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Rời phòng
+                    </button>
+                </div>
+
+                <!-- Chat Area -->
+                <div class="chat-area">
+                    <div class="chat-title">
+                        <i class="fas fa-comments"></i>
+                        Trò chuyện
+                    </div>
+                    <div class="chat-messages" id="chatMessages">
+                        <!-- Chat messages will be added here -->
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" id="chatInput" placeholder="Nhập tin nhắn..." maxlength="200">
+                        <button onclick="sendMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Player Hand Button -->
+        <div class="player-hand-trigger">
+            <button id="openHandBtn" class="hand-btn" onclick="openPlayerHand()">
+                <i class="fas fa-hand-holding"></i>
+                Thẻ của bạn
+                <span class="card-count" id="cardCount">0</span>
+            </button>
+        </div>
+
+        <!-- Player Hand Modal -->
+        <div id="playerHandModal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="modal-title">
+                        <i class="fas fa-hand-holding"></i>
+                        Thẻ bài của bạn
+                        <span class="card-count-modal" id="cardCountModal">0/6</span>
+                    </div>
+                    <button class="modal-close" onclick="closePlayerHand()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="player-cards-grid" id="playerCards">
+                        <!-- Player cards will be added here -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="submitBtnModal" class="action-btn btn-submit" onclick="submitCard()" disabled>
+                        <i class="fas fa-paper-plane"></i>
+                        Gửi lựa chọn
+                    </button>
+                    <button class="action-btn btn-secondary" onclick="closePlayerHand()">
+                        <i class="fas fa-times"></i>
+                        Đóng
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="text-align: center; padding: 2rem; color: rgba(255,255,255,0.8); font-size: 0.875rem;">
+            <p>🎮 Meme Card Game - Tạo ra những khoảnh khắc vui vẻ cùng bạn bè!</p>
+            <p>Dev by <a href="https://www.facebook.com/nguyen.thanh.loc.978000/" target="_blank" style="color: yellow; text-decoration: none; font-weight: 600;">Nguyễn Thành Lộc</a></p>
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        let socket;
+        let currentRoom;
+        let playerName;
+        let isHost = false;
+        let selectedCard = null;
+        let gameState = 'waiting';
+        let playerCards = [];
+
+        // Initialize when page loads
+        window.onload = function() {
+            const pathParts = window.location.pathname.split('/');
+            currentRoom = pathParts[pathParts.length - 1];
+            
+            playerName = sessionStorage.getItem('playerName');
+            isHost = sessionStorage.getItem('isHost') === 'true';
+            
+            if (!playerName || !currentRoom) {
+                showMessage('Thông tin không hợp lệ. Quay về trang chủ.', 'error');
+                setTimeout(() => window.location.href = '/', 2000);
+                return;
+            }
+            
+            updateRoomCode(currentRoom);
+            initSocket();
+            addChatMessage('Hệ thống', 'Chào mừng đến với Meme Card Game! 🎮');
+        };
+
+        function initSocket() {
+            socket = io();
+            
+            socket.on('connect', () => {
+                console.log('Connected to server');
+                socket.emit('joinRoom', { roomId: currentRoom, playerName: playerName });
+            });
+
+            socket.on('playerJoined', (data) => {
+                updatePlayersList(data.players);
+                if (data.newPlayer) {
+                    addChatMessage('Hệ thống', `${data.newPlayer} đã tham gia phòng! 👋`);
+                }
+                updateGameControls(data.players);
+            });
+
+            socket.on('gameStarted', (data) => {
+                console.log('Game started event received:', data);
+                gameState = 'playing';
+                updateGameStatus('Đang chơi', 'success');
+                showGameInterface();
+                updatePlayerCards(data.cards);
+                updatePlayersList(data.players);
+                addChatMessage('Hệ thống', '🎮 Trò chơi đã bắt đầu!');
+                updateGameControls(data.players);
+                console.log('Game state after start:', gameState);
+            });
+
+            socket.on('newRound', (data) => {
+                showCaption(data.caption);
+                updatePlayersList(data.players);
+                resetCardSelection();
+                
+                // Update player cards if new cards are provided
+                if (data.cards && data.cards.length > 0) {
+                    updatePlayerCards(data.cards);
+                    addChatMessage('Hệ thống', `🎯 Round mới: ${data.caption.text} - Đã nhận 6 meme cards mới!`);
+                } else {
+                    addChatMessage('Hệ thống', `🎯 Round mới: ${data.caption.text}`);
+                }
+                
+                updateGameControls(data.players);
+                
+                // Initialize countdown display
+                if (data.timeLeft && data.phase) {
+                    updateCountdown({ timeLeft: data.timeLeft, phase: data.phase });
+                }
+            });
+
+            socket.on('revealSubmission', (data) => {
+                console.log('Revealing submission:', data);
+                showRevealSubmission(data);
+            });
+
+            socket.on('votingPhase', (data) => {
+                showVotingInterface(data);
+                addChatMessage('Hệ thống', '🗳️ Bắt đầu bình chọn!');
+            });
+
+            socket.on('roundResults', (data) => {
+                showResults(data);
+                updatePlayersList(data.players);
+            });
+
+            socket.on('gameOver', (data) => {
+                showGameOver(data);
+            });
+
+            socket.on('countdown', (data) => {
+                updateCountdown(data);
+            });
+
+            socket.on('cardSubmitted', (data) => {
+                addChatMessage('Hệ thống', `${data.playerName} đã gửi lựa chọn (${data.submissionsCount}/${data.totalPlayers})`);
+            });
+
+            socket.on('voteReceived', (data) => {
+                addChatMessage('Hệ thống', `${data.voterName} đã bình chọn cho ${data.submissionPlayerName}`);
+            });
+
+            socket.on('gameStopped', (data) => {
+                handleGameStopped(data);
+                addChatMessage('Hệ thống', '🛑 Trò chơi đã được dừng!');
+            });
+
+            socket.on('chatMessage', (data) => {
+                addChatMessage(data.sender, data.message);
+            });
+
+            socket.on('error', (message) => {
+                showMessage(message, 'error');
+            });
+
+            socket.on('disconnect', () => {
+                console.log('Disconnected from server');
+                addChatMessage('Hệ thống', '⚠️ Mất kết nối với server');
+                updateGameStatus('Mất kết nối', 'error');
+            });
+        }
+
+        function updateRoomCode(roomId) {
+            document.getElementById('roomCode').innerHTML = roomId;
+        }
+
+        function updatePlayersList(players) {
+            const playersList = document.getElementById('playersList');
+            playersList.innerHTML = '';
+            
+            players.forEach(player => {
+                const playerCard = document.createElement('div');
+                playerCard.className = 'player-card';
+                
+                if (player.isHost) {
+                    playerCard.classList.add('host');
+                }
+                
+                playerCard.innerHTML = `
+                    <div class="player-avatar">${player.name.charAt(0).toUpperCase()}</div>
+                    <span>${player.name}</span>
+                    <span class="player-score">${player.score}</span>
+                    ${player.isHost ? '<span class="host-badge"><i class="fas fa-crown"></i> Host</span>' : ''}
+                `;
+                
+                playersList.appendChild(playerCard);
+            });
+        }
+
+        function updateGameStatus(status, type = 'default') {
+            const gameStatusElement = document.getElementById('gameStatus');
+            gameStatusElement.innerHTML = `
+                <div class="status-indicator"></div>
+                ${status}
+            `;
+            
+            const indicator = gameStatusElement.querySelector('.status-indicator');
+            indicator.style.background = type === 'success' ? 'var(--success)' : 
+                                      type === 'error' ? 'var(--danger)' : 'var(--success)';
+        }
+
+        function updateGameControls(players) {
+            const startBtn = document.getElementById('startBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            
+            console.log('Updating game controls:', {
+                isHost: isHost,
+                gameState: gameState,
+                playersCount: players.length,
+                startBtnExists: !!startBtn,
+                stopBtnExists: !!stopBtn
+            });
+            
+            if (isHost) {
+                if (players.length >= 3 && gameState === 'waiting') {
+                    console.log('Showing start button');
+                    startBtn.style.display = 'block';
+                    stopBtn.style.display = 'none';
+                } else if (gameState === 'playing') {
+                    console.log('Showing stop button');
+                    startBtn.style.display = 'none';
+                    stopBtn.style.display = 'block';
+                } else {
+                    console.log('Hiding both buttons');
+                    startBtn.style.display = 'none';
+                    stopBtn.style.display = 'none';
+                }
+            } else {
+                console.log('Not host - hiding all buttons');
+                startBtn.style.display = 'none';
+                stopBtn.style.display = 'none';
+            }
+        }
+
+        function showGameInterface() {
+            document.getElementById('waitingMessage').style.display = 'none';
+            document.getElementById('captionDisplay').style.display = 'block';
+        }
+
+        function updatePlayerCards(cards) {
+            console.log('Updating player cards:', cards);
+            // Limit to 6 cards maximum
+            playerCards = cards.slice(0, 6);
+            const cardsGrid = document.getElementById('playerCards');
+            cardsGrid.innerHTML = '';
+            
+            playerCards.forEach((card, index) => {
+                console.log(`Card ${index}:`, card);
+                const cardElement = document.createElement('div');
+                cardElement.className = 'meme-card';
+                cardElement.onclick = () => selectCard(index, cardElement);
+                
+                cardElement.innerHTML = `
+                    <div style="width: 100%; height: 100%; background: white; border-radius: 8px; border: 2px solid #e9ecef; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                        <img src="${card.imageUrl}" alt="Meme" style="max-height: 100%; width: auto; object-fit: contain; border-radius: 4px;">
+                    </div>
+                `;
+                cardsGrid.appendChild(cardElement);
+            });
+            
+            // Update both card counters
+            document.getElementById('cardCount').textContent = playerCards.length;
+            document.getElementById('cardCountModal').textContent = `${playerCards.length}/6`;
+        }
+
+        // Modal control functions
+        function openPlayerHand() {
+            document.getElementById('playerHandModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        function closePlayerHand() {
+            document.getElementById('playerHandModal').style.display = 'none';
+            document.body.style.overflow = 'auto'; // Restore scrolling
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('DOMContentLoaded', function() {
+            const modal = document.getElementById('playerHandModal');
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === modal) {
+                        closePlayerHand();
+                    }
+                });
+            }
+        });
+
+        // Close modal with Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closePlayerHand();
+            }
+        });
+
+        function selectCard(cardIndex, cardElement) {
+            document.querySelectorAll('.meme-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            cardElement.classList.add('selected');
+            selectedCard = cardIndex;
+            
+            // Enable both submit buttons
+            const submitBtn = document.getElementById('submitBtn');
+            const submitBtnModal = document.getElementById('submitBtnModal');
+            
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Gửi lựa chọn';
+            }
+            
+            if (submitBtnModal) {
+                submitBtnModal.disabled = false;
+                submitBtnModal.innerHTML = '<i class="fas fa-paper-plane"></i> Gửi lựa chọn';
+            }
+        }
+
+        function showCaption(caption) {
+            document.getElementById('captionText').textContent = caption.text;
+            document.getElementById('captionInfo').textContent = 'Chọn meme phù hợp nhất với caption này!';
+            document.getElementById('captionDisplay').style.display = 'block';
+            
+            // Show submitting countdown
+            const submittingCountdown = document.getElementById('submittingCountdown');
+            if (submittingCountdown) {
+                submittingCountdown.style.display = 'block';
+            }
+        }
+
+        function resetCardSelection() {
+            selectedCard = null;
+            document.querySelectorAll('.meme-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Disable both submit buttons
+            const submitBtn = document.getElementById('submitBtn');
+            const submitBtnModal = document.getElementById('submitBtnModal');
+            
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Gửi lựa chọn';
+            }
+            
+            if (submitBtnModal) {
+                submitBtnModal.disabled = true;
+                submitBtnModal.innerHTML = '<i class="fas fa-paper-plane"></i> Gửi lựa chọn';
+            }
+        }
+
+        function showRevealSubmission(data) {
+            try {
+                console.log('Showing reveal submission:', data);
+                console.log('Submission card data:', data.submission?.card);
+                
+                // Validate data structure
+                if (!data.submission || !data.submission.card || !data.submission.card.imageUrl) {
+                    console.error('Invalid submission data:', data);
+                    showMessage('Lỗi dữ liệu submission', 'error');
+                    return;
+                }
+                
+                // Close player hand modal if open
+                closePlayerHand();
+                
+                // Update caption info
+                document.getElementById('captionInfo').textContent = `Xem kết quả (${data.currentIndex}/${data.totalSubmissions})`;
+                
+                // Hide submitting countdown
+                const submittingCountdown = document.getElementById('submittingCountdown');
+                if (submittingCountdown) {
+                    submittingCountdown.style.display = 'none';
+                }
+                
+                // Create or update reveal area
+                const gameArea = document.querySelector('.game-area');
+                
+                // Remove existing reveal/voting area if any
+                const existingReveal = document.getElementById('revealArea');
+                const existingVoting = document.getElementById('votingArea');
+                if (existingReveal) existingReveal.remove();
+                if (existingVoting) existingVoting.remove();
+                
+                const revealArea = document.createElement('div');
+                revealArea.id = 'revealArea';
+                
+                revealArea.innerHTML = `
+                    <div style="display: flex; flex-direction: column; align-items: center; margin-top: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+                        <div style="
+                            background: linear-gradient(135deg, var(--gray-50) 0%, white 100%);
+                            border: 3px solid var(--primary);
+                            border-radius: var(--radius-lg);
+                            padding: 1rem;
+                            box-shadow: var(--shadow-lg);
+                            width: 400px;
+                            height: 225px;
+                            display: flex;
+                            flex-direction: column;
+                            justify-content: space-between;
+                            animation: revealCard 0.5s ease-out;
+                        ">
+                            <div style="width: 100%; flex: 1; background: white; border-radius: 8px; border: 2px solid #e9ecef; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                                <img src="${data.submission.card.imageUrl}" alt="Meme" style="max-height: 100%; width: auto; object-fit: contain; border-radius: 4px;">
+                            </div>
+                            <div style="color: var(--gray-700); font-size: 1.1rem; font-weight: 600; margin-top: 0.75rem; text-align: center;">
+                                bởi ${data.submission.playerName}
+                            </div>
+                        </div>
+                        <div style="margin-top: 1.5rem; text-align: center; color: var(--gray-600); font-size: 1rem;">
+                            <i class="fas fa-eye"></i> Đang hiển thị kết quả...
+                        </div>
+                    </div>
+                `;
+                
+                gameArea.appendChild(revealArea);
+                
+                // Add animation CSS if not already added
+                if (!document.getElementById('revealAnimationCSS')) {
+                    const style = document.createElement('style');
+                    style.id = 'revealAnimationCSS';
+                    style.textContent = `
+                        @keyframes revealCard {
+                            0% {
+                                opacity: 0;
+                                transform: scale(0.8) translateY(20px);
+                            }
+                            100% {
+                                opacity: 1;
+                                transform: scale(1) translateY(0);
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+                
+                addChatMessage('Hệ thống', `🎭 ${data.submission.playerName} đã chọn meme này!`);
+                
+            } catch (error) {
+                console.error('Error in showRevealSubmission:', error);
+                console.error('Data received:', data);
+                showMessage('Lỗi hiển thị kết quả', 'error');
+            }
+        }
+
+        function showVotingInterface(data) {
+            try {
+                console.log('Showing voting interface:', data);
+                console.log('Submissions received:', data.submissions);
+                console.log('Number of submissions:', data.submissions?.length);
+                
+                // Close player hand modal if open
+                closePlayerHand();
+                
+                // Update caption info
+                document.getElementById('captionInfo').textContent = 'Bình chọn meme hay nhất!';
+                
+                // Create voting area
+                const gameArea = document.querySelector('.game-area');
+            
+            // Remove existing reveal/voting area if any
+            const existingReveal = document.getElementById('revealArea');
+            const existingVoting = document.getElementById('votingArea');
+            if (existingReveal) existingReveal.remove();
+            if (existingVoting) existingVoting.remove();
+            
+            // Get current player's socket ID (we need to get this from somewhere)
+            // For now, we'll use playerName to identify own submission
+            const currentPlayerName = playerName;
+            
+            const votingArea = document.createElement('div');
+            votingArea.id = 'votingArea';
+            
+            console.log('Creating voting HTML for submissions:', data.submissions);
+            
+            votingArea.innerHTML = `
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 2rem; max-width: 900px; margin-left: auto; margin-right: auto;">
+                    ${data.submissions.map(submission => {
+                        console.log('Processing submission:', submission);
+                        const isOwnSubmission = submission.playerName === currentPlayerName;
+                        return `
+                            <div class="voting-card ${isOwnSubmission ? 'own-submission' : ''}" 
+                                 ${!isOwnSubmission ? `onclick="voteForCard('${submission.id}')"` : ''} 
+                                 style="
+                                background: ${isOwnSubmission ? 'linear-gradient(135deg, var(--gray-300) 0%, var(--gray-400) 100%)' : 'linear-gradient(135deg, var(--gray-50) 0%, white 100%)'};
+                                border: 3px solid ${isOwnSubmission ? 'var(--gray-400)' : 'var(--gray-200)'};
+                                border-radius: var(--radius-lg);
+                                padding: 0.5rem;
+                                cursor: ${isOwnSubmission ? 'not-allowed' : 'pointer'};
+                                transition: all 0.3s ease;
+                                box-shadow: var(--shadow-sm);
+                                opacity: ${isOwnSubmission ? '0.6' : '1'};
+                                position: relative;
+                                aspect-ratio: 16/9;
+                                display: flex;
+                                flex-direction: column;
+                                justify-content: space-between;
+                                width: 280px;
+                                height: 157px;
+                            ">
+                                ${isOwnSubmission ? '<div style="position: absolute; top: 0.5rem; right: 0.5rem; background: var(--primary); color: white; padding: 0.25rem 0.5rem; border-radius: var(--radius); font-size: 0.75rem; font-weight: 600;">Của bạn</div>' : ''}
+                                <div style="width: 100%; flex: 1; background: white; border-radius: 8px; border: 2px solid #e9ecef; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                                    <img src="${submission.card.imageUrl}" alt="Meme" style="max-height: 100%; width: auto; object-fit: contain; border-radius: 4px;">
+                                </div>
+                                <div style="color: var(--gray-600); font-size: 0.85rem; margin-top: 0.5rem; text-align: center;">
+                                    bởi ${submission.playerName}
+                                </div>
+                                ${isOwnSubmission ? '<div style="font-size: 0.8rem; color: var(--gray-500); font-style: italic; text-align: center;">Không thể vote cho chính mình</div>' : ''}
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+                <div style="text-align: center; margin-top: 2rem; color: var(--gray-600);">
+                    <i class="fas fa-clock"></i> Thời gian còn lại: <span id="votingTimer">${data.timeLeft}</span>s
+                </div>
+            `;
+            
+            console.log('Appending voting area to game area');
+            gameArea.appendChild(votingArea);
+            console.log('Voting area appended successfully');
+            
+            // Add hover effects only for votable cards
+            document.querySelectorAll('.voting-card:not(.own-submission)').forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-4px) scale(1.02)';
+                    this.style.boxShadow = 'var(--shadow-md)';
+                    this.style.borderColor = 'var(--primary)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    if (!this.classList.contains('voted')) {
+                        this.style.transform = '';
+                        this.style.boxShadow = 'var(--shadow-sm)';
+                        this.style.borderColor = 'var(--gray-200)';
+                    }
+                });
+            });
+            } catch (error) {
+                console.error('Error in showVotingInterface:', error);
+                showMessage('Lỗi hiển thị giao diện bình chọn', 'error');
+            }
+        }
+
+        function voteForCard(playerId) {
+            console.log('Voting for player:', playerId);
+            
+            // Double check - don't allow voting for own submission
+            if (playerId === socket.id) {
+                showMessage('Không thể vote cho meme của chính mình!', 'error');
+                return;
+            }
+            
+            socket.emit('voteCard', {
+                roomId: currentRoom,
+                submissionPlayerId: playerId
+            });
+            
+            // Mark as voted - disable all votable cards
+            document.querySelectorAll('.voting-card:not(.own-submission)').forEach(card => {
+                card.style.pointerEvents = 'none';
+                card.style.opacity = '0.6';
+            });
+            
+            // Highlight voted card
+            const votedCard = event.target.closest('.voting-card');
+            votedCard.style.background = 'linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%)';
+            votedCard.style.color = 'white';
+            votedCard.style.opacity = '1';
+            votedCard.classList.add('voted');
+            
+            addChatMessage('Bạn', '✅ Đã bình chọn!');
+        }
+
+        function showResults(data) {
+            console.log('Showing results:', data);
+            
+            // Remove voting area
+            // Remove reveal/voting area if exists
+            const revealArea = document.getElementById('revealArea');
+            const votingArea = document.getElementById('votingArea');
+            if (revealArea) revealArea.remove();
+            if (votingArea) votingArea.remove();
+            
+            // Update caption info
+            document.getElementById('captionInfo').textContent = 'Kết quả bình chọn';
+            
+            // Create results area
+            const gameArea = document.querySelector('.game-area');
+            const resultsArea = document.createElement('div');
+            resultsArea.id = 'resultsArea';
+            resultsArea.innerHTML = `
+                <div style="text-align: center; margin: 2rem 0;">
+                    <h3 style="color: var(--primary); margin-bottom: 1rem;">
+                        🏆 Người thắng: ${data.winners.join(', ')}
+                    </h3>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; max-width: 900px; margin: 0 auto;">
+                        ${data.submissions.map(submission => `
+                            <div style="
+                                background: ${submission.isWinner ? 'linear-gradient(135deg, var(--success) 0%, #16a34a 100%)' : 'linear-gradient(135deg, var(--gray-50) 0%, white 100%)'};
+                                color: ${submission.isWinner ? 'white' : 'var(--gray-800)'};
+                                border: 3px solid ${submission.isWinner ? 'var(--success)' : 'var(--gray-200)'};
+                                border-radius: var(--radius-lg);
+                                padding: 0.5rem;
+                                box-shadow: var(--shadow-sm);
+                                ${submission.isWinner ? 'transform: scale(1.05);' : ''}
+                                aspect-ratio: 16/9;
+                                display: flex;
+                                flex-direction: column;
+                                justify-content: space-between;
+                                position: relative;
+                                width: 280px;
+                                height: 157px;
+                            ">
+                                ${submission.isWinner ? '<div style="position: absolute; top: 0.5rem; left: 50%; transform: translateX(-50%); font-size: 1.8rem;">🏆</div>' : ''}
+                                <div style="width: 100%; flex: 1; background: white; border-radius: 8px; border: 2px solid #e9ecef; overflow: hidden; display: flex; align-items: center; justify-content: center; ${submission.isWinner ? 'margin-top: 1.5rem;' : ''}">
+                                    <img src="${submission.card.imageUrl}" alt="Meme" style="max-height: 100%; width: auto; object-fit: contain; border-radius: 4px;">
+                                </div>
+                                <div style="text-align: center; margin-top: 0.5rem;">
+                                    <div style="opacity: 0.8; font-size: 0.85rem; margin-bottom: 0.25rem;">
+                                        bởi ${submission.playerName}
+                                    </div>
+                                    <div style="font-weight: 700; font-size: 1rem;">
+                                        ${submission.votes} vote${submission.votes !== 1 ? 's' : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div style="margin-top: 2rem; color: var(--gray-600);">
+                        Round mới sẽ bắt đầu sau 5 giây...
+                    </div>
+                </div>
+            `;
+            
+            gameArea.appendChild(resultsArea);
+            
+            // Remove results after 5 seconds
+            setTimeout(() => {
+                if (resultsArea) {
+                    resultsArea.remove();
+                }
+                // Player hand is now a modal, no need to show it automatically
+            }, 5000);
+        }
+
+        function showGameOver(data) {
+            console.log('Game over:', data);
+            
+            const gameArea = document.querySelector('.game-area');
+            gameArea.innerHTML = `
+                <div style="text-align: center; padding: 4rem 2rem;">
+                    <div style="font-size: 4rem; margin-bottom: 2rem;">🎉</div>
+                    <h1 style="color: var(--primary); margin-bottom: 1rem; font-size: 3rem;">
+                        Game Over!
+                    </h1>
+                    <h2 style="color: var(--success); margin-bottom: 2rem; font-size: 2rem;">
+                        🏆 ${data.winner} thắng!
+                    </h2>
+                    <div style="background: rgba(255,255,255,0.1); border-radius: var(--radius-lg); padding: 2rem; margin: 2rem 0;">
+                        <h3 style="margin-bottom: 1rem;">Bảng điểm cuối:</h3>
+                        ${data.players.map(player => `
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; ${player.name === data.winner ? 'color: var(--success); font-weight: 700;' : ''}">
+                                <span>${player.name === data.winner ? '🏆 ' : ''}${player.name}</span>
+                                <span>${player.score} điểm</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button onclick="location.href='/'" style="
+                        background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+                        color: white;
+                        border: none;
+                        padding: 1rem 2rem;
+                        border-radius: var(--radius-lg);
+                        font-size: 1.1rem;
+                        font-weight: 600;
+                        cursor: pointer;
+                        margin-top: 2rem;
+                    ">
+                        Về trang chủ
+                    </button>
+                </div>
+            `;
+        }
+
+        function updateCountdown(data) {
+            console.log('Updating countdown:', data);
+            
+            if (data.phase === 'submitting') {
+                // Update submitting phase countdown
+                const submittingTimer = document.getElementById('submittingTimer');
+                const submittingCountdown = document.getElementById('submittingCountdown');
+                
+                if (submittingTimer && submittingCountdown) {
+                    submittingTimer.textContent = data.timeLeft;
+                    submittingCountdown.style.display = 'block';
+                    
+                    // Change color when time is running out
+                    if (data.timeLeft <= 5) {
+                        submittingTimer.style.color = 'var(--danger)';
+                        submittingCountdown.style.background = 'rgba(239, 68, 68, 0.1)';
+                    } else if (data.timeLeft <= 10) {
+                        submittingTimer.style.color = 'var(--warning)';
+                        submittingCountdown.style.background = 'rgba(245, 158, 11, 0.1)';
+                    } else {
+                        submittingTimer.style.color = 'var(--gray-700)';
+                        submittingCountdown.style.background = 'rgba(255,255,255,0.1)';
+                    }
+                }
+            } else if (data.phase === 'voting') {
+                // Hide submitting countdown
+                const submittingCountdown = document.getElementById('submittingCountdown');
+                if (submittingCountdown) {
+                    submittingCountdown.style.display = 'none';
+                }
+                
+                // Update voting phase countdown
+                const votingTimer = document.getElementById('votingTimer');
+                if (votingTimer) {
+                    votingTimer.textContent = data.timeLeft;
+                    
+                    // Change color when time is running out
+                    if (data.timeLeft <= 5) {
+                        votingTimer.style.color = 'var(--danger)';
+                        votingTimer.style.fontWeight = '700';
+                    } else if (data.timeLeft <= 10) {
+                        votingTimer.style.color = 'var(--warning)';
+                        votingTimer.style.fontWeight = '600';
+                    }
+                }
+            }
+        }
+
+        function handleGameStopped(data) {
+            console.log('Game stopped:', data);
+            
+            // Reset game state
+            gameState = 'waiting';
+            selectedCard = null;
+            playerCards = [];
+            
+            // Update game status
+            updateGameStatus('Chờ bắt đầu', 'default');
+            
+            // Clear game area and show waiting message
+            const gameArea = document.querySelector('.game-area');
+            gameArea.innerHTML = `
+                <div class="caption-display" id="captionDisplay" style="display: none;">
+                    <div class="caption-card-large">
+                        <div class="caption-icon">💭</div>
+                        <div class="caption-text" id="captionText">Đang tải...</div>
+                    </div>
+                    <div class="caption-info" id="captionInfo">
+                        Chọn meme phù hợp nhất với caption này!
+                    </div>
+                </div>
+
+                <div class="waiting-message" id="waitingMessage">
+                    <i class="fas fa-users" style="font-size: 3rem; margin-bottom: 1rem; opacity: 0.5;"></i>
+                    <br>
+                    Đang chờ thêm người chơi...
+                    <br>
+                    <small style="opacity: 0.7;">Cần ít nhất 3 người để bắt đầu</small>
+                </div>
+            `;
+            
+            // Clear player cards
+            const playerCardsGrid = document.getElementById('playerCards');
+            if (playerCardsGrid) {
+                playerCardsGrid.innerHTML = '';
+            }
+            
+            // Update card count
+            const cardCount = document.getElementById('cardCount');
+            if (cardCount) {
+                cardCount.textContent = '0';
+            }
+            
+            // Show player hand again (in case it was hidden during voting)
+            const playerHand = document.querySelector('.player-hand');
+            if (playerHand) {
+                playerHand.style.display = 'flex';
+            }
+            
+            // Reset submit button
+            const submitBtn = document.getElementById('submitBtn');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Gửi lựa chọn';
+                submitBtn.style.background = '';
+            }
+            
+            // Update players list
+            if (data.players) {
+                updatePlayersList(data.players);
+                updateGameControls(data.players);
+            }
+            
+            showMessage('Trò chơi đã được dừng và reset!', 'success');
+        }
+
+        function startGame() {
+            socket.emit('startGame', currentRoom);
+            showMessage('Đang bắt đầu trò chơi...', 'success');
+        }
+
+        function stopGame() {
+            if (confirm('Bạn có chắc muốn dừng trò chơi?')) {
+                socket.emit('stopGame', currentRoom);
+                showMessage('Đã dừng trò chơi', 'success');
+            }
+        }
+
+        function submitCard() {
+            if (selectedCard === null) {
+                showMessage('Vui lòng chọn một meme card!', 'error');
+                return;
+            }
+            
+            // Get the actual card ID from playerCards array
+            const selectedCardData = playerCards[selectedCard];
+            if (!selectedCardData || !selectedCardData._id) {
+                console.error('Card data error:', selectedCardData);
+                showMessage('Lỗi: Không tìm thấy thông tin card!', 'error');
+                return;
+            }
+            
+            console.log('Submitting card:', {
+                cardId: selectedCardData._id,
+                cardName: selectedCardData.name,
+                roomId: currentRoom
+            });
+            
+            socket.emit('submitCard', { 
+                roomId: currentRoom, 
+                cardId: selectedCardData._id 
+            });
+            
+            // Update both submit buttons
+            const submitBtn = document.getElementById('submitBtn');
+            const submitBtnModal = document.getElementById('submitBtnModal');
+            
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fas fa-check"></i> Đã gửi';
+                submitBtn.style.background = 'var(--success)';
+            }
+            
+            if (submitBtnModal) {
+                submitBtnModal.disabled = true;
+                submitBtnModal.innerHTML = '<i class="fas fa-check"></i> Đã gửi';
+                submitBtnModal.style.background = 'var(--success)';
+            }
+            
+            // Close modal after successful submission
+            closePlayerHand();
+            
+            addChatMessage('Bạn', `✅ Đã gửi lựa chọn: ${selectedCardData.name}`);
+        }
+
+        function leaveRoom() {
+            if (confirm('Bạn có chắc muốn rời phòng?')) {
+                socket.emit('leaveRoom', currentRoom);
+                showMessage('Đang rời phòng...', 'success');
+                setTimeout(() => window.location.href = '/', 1000);
+            }
+        }
+
+        function copyRoomCode() {
+            navigator.clipboard.writeText(currentRoom).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> Đã sao chép!';
+                btn.style.background = 'linear-gradient(135deg, var(--success) 0%, #16a34a 100%)';
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                    btn.style.background = '';
+                }, 2000);
+            }).catch(() => {
+                showMessage('Không thể sao chép. Mã phòng: ' + currentRoom, 'error');
+            });
+        }
+
+        function addChatMessage(sender, message) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message';
+            
+            const time = new Date().toLocaleTimeString('vi-VN', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            messageDiv.innerHTML = `
+                <strong>${sender}:</strong> ${message}
+                <small style="float: right; opacity: 0.6;">${time}</small>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                socket.emit('chatMessage', { roomId: currentRoom, message: message });
+                addChatMessage('Bạn', message);
+                input.value = '';
+            }
+        }
+
+        function showMessage(message, type = 'success') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            messageDiv.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
+                ${message}
+            `;
+            
+            const gameContainer = document.querySelector('.game-container');
+            gameContainer.insertBefore(messageDiv, gameContainer.firstChild);
+            
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // Enter key to send message
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatInput = document.getElementById('chatInput');
+            if (chatInput) {
+                chatInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        sendMessage();
+                    }
+                });
+            }
+        });
+
+        // Handle page visibility change
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'visible' && socket && !socket.connected) {
+                socket.connect();
+            }
+        });
+
+        // Prevent accidental page refresh
+        window.addEventListener('beforeunload', function(e) {
+            if (gameState === 'playing') {
+                e.preventDefault();
+                e.returnValue = 'Bạn đang trong trò chơi. Bạn có chắc muốn rời đi?';
+            }
+        });
+    </script>
+</body>
+</html> 
